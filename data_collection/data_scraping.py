@@ -4,11 +4,20 @@ from bs4 import BeautifulSoup as bs
 import requests
 import pandas as pd
 import numpy as np
+import datetime
 
 ### request html code
-### english language and germany. otherwise no parameter
+### english language, data and germany. otherwise no parameter
 
-url = 'https://www.stepstone.de/jobs/in-germany?radius=30'
+### get current time
+
+now = datetime.datetime.now()
+
+# dd/mm/YY H:M:S
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+print("the scraping starts at:", dt_string)
+
+url = 'https://www.stepstone.de/jobs/data/in-germany?radius=30'
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0)'}
 
 response = requests.get(url, headers=headers)
@@ -27,7 +36,7 @@ print("created the beautiful soup for:", soup.title)
 ### job block, displayed on landing page for each job offer
 jobs = soup.find_all('article', class_='res-j5y1mq')
 
-job_titles, companies, locations, descriptions = [],[],[],[]
+job_titles, companies, locations, descriptions, times = [],[],[],[],[]
 
 for job in jobs:
     job_title = job.find('div', class_='res-nehv70').text
@@ -39,10 +48,15 @@ for job in jobs:
     location = company.find_next('span', class_='res-btchsq')
     locations.append(location.text)
     
-    description = job.find('div', class_='res-1d1eotm')
+    description = job.find('div', class_='res-zb22na')
     descriptions.append(description.text)
     
-df_new=pd.DataFrame(list(zip(job_titles, companies, locations, descriptions)), columns=['job_titles', 'companies', 'locations', 'descriptions'])
+    time_element =  soup.find('time')
+    times.append(time_element.text)
+    
+df_new=pd.DataFrame(list(zip(job_titles, companies, locations, descriptions, times)), columns=['job_titles', 'companies', 'locations', 'descriptions', 'published'])
+
+df_new['time_of_scraping'] = pd.Series([dt_string] * len(df_new))
 
 ### save dataframe into .csv    
 old_df = pd.read_csv('jobs.csv')
