@@ -2,12 +2,13 @@
 
 from bs4 import BeautifulSoup as bs
 import requests
+from urllib.parse import urljoin
 import pandas as pd
 import numpy as np
+
 import datetime
 
-### request html code
-### english language, data and germany. otherwise no parameter
+import json
 
 ### get current time
 
@@ -17,7 +18,12 @@ now = datetime.datetime.now()
 dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 print("the scraping starts at:", dt_string)
 
-url = 'https://www.stepstone.de/jobs/data/in-germany?radius=30'
+######################################################################
+
+### request html code
+### english language, data and germany. otherwise no parameter, sorted by publish date
+
+url = 'https://www.stepstone.de/jobs/data/in-germany?radius=30&sort=2&action=sort_publish'
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0)'}
 
 response = requests.get(url, headers=headers)
@@ -33,28 +39,67 @@ soup = bs(response.content, 'html.parser')
 
 print("created the beautiful soup for:", soup.title)
 
-### job block, displayed on landing page for each job offer
-jobs = soup.find_all('article', class_='res-j5y1mq')
+## find and extract links to job offers
 
-job_titles, companies, locations, descriptions, times = [],[],[],[],[]
+job_offer_links = []
+links = soup.find_all("a", class_="res-y456gn")
+base_url = 'https://www.stepstone.de'
 
-for job in jobs:
-    job_title = job.find('div', class_='res-nehv70').text
-    job_titles.append(job_title)
+for link in links:
+    job_url = link.get('href')
+    complete_job_url = urljoin(base_url, job_url)
+    job_offer_links.append(complete_job_url)
     
-    company = job.find('span', class_='res-btchsq')
-    companies.append(company.text)
+print(len(job_offer_links), "new job offers found.")
+###############################################################################
+
+## parse and scrape from each job offer page
+job_titles, companies, locations = [],[],[]
+description_titles, descriptions, benefits = [],[],[]
+
+for job_link in job_offer_links:
+    print("scraping following job post:", job_link)
+    job_response = requests.get(job_link, headers = headers)
+    print("request status:", job_response.status_code)
     
-    location = company.find_next('span', class_='res-btchsq')
-    locations.append(location.text)
+    job_soup = bs(job_response.text, 'html.parser')
     
-    description = job.find('div', class_='res-zb22na')
-    descriptions.append(description.text)
+    job_title = job_soup.find('span', class_='listing-content-provider-bewwo')
+    job_titles.append(job_title.text)
     
-    time_element =  soup.find('time')
-    times.append(time_element.text)
+    company = job_soup.find('a', class_='listing-content-provider-zw6cpm')
     
-df_new=pd.DataFrame(list(zip(job_titles, companies, locations, descriptions, times)), columns=['job_titles', 'companies', 'locations', 'descriptions', 'published'])
+    location_elements = job_soup.find_all('span', class_='listing-content-provider-1whr5zf')
+    location_elements_list = [location.text for location in location_elements]
+    locations.append(location_elements_list)
+    
+    benefit = job_soup.find('h4', class_='listing-company-content-provider-1nsjzge listingHeaderColor')
+    
+    description_title_elements = job_soup.find_all('h4', class_='listing-content-provider-1t9vh2w listingHeaderColor')
+    description_title_list = [element.text for element in description_title_elements]
+    description_titles.append(description_title_list)
+    description_elements = job_soup.find_all('span', class_='listing-content-provider-14ydav7')
+    description_list = [element.text for element in description_elements]
+    descriptions.append(description_list)
+    
+    
+    if company:
+        companies.append(company.text)
+    else:
+        companies.append('not available')
+        
+    if benefit:
+        benefit_elements = job_soup.find_all('span', class_='listing-company-content-provider-1mvot2o')
+        benefit_list = [element.text for element in benefit_elements]
+        benefits.append(benefit_list)
+    else:
+        benefits.append('not available')
+
+#############################################################################
+
+
+
+df_new=pd.DataFrame(list(zip(job_titles, companies, locations, description_titles, descriptions, benefits)), columns=['job_titles', 'companies', 'locations', 'description_titles', 'descriptions', 'benefits'])
 
 df_new['time_of_scraping'] = pd.Series([dt_string] * len(df_new))
 
@@ -63,8 +108,14 @@ old_df = pd.read_csv('jobs.csv')
 jobs = pd.concat([old_df, df_new], ignore_index=True)
 jobs.to_csv('./jobs.csv')
 
+## when initialized: #df_new.to_csv('./jobs.csv')
+
 ### status print
 print("the new file has", len(jobs), "entries")
+
+
+
+
                      
                      
                      
