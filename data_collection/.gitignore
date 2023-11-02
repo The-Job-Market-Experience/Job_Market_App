@@ -1,0 +1,8 @@
+.*
+!/.gitignore
+.DS_Store
+*.csv
+*.json
+stepstone_data_engineering.py
+stepstone_data_collection.ipynb
+
