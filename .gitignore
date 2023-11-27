@@ -8,3 +8,4 @@
 /elasticsearch3
 /elasticsearch/bulk_script.py
 /elasticsearch/ingest_data.py
+/data_collection/data_prep.ipynb.ipynb
