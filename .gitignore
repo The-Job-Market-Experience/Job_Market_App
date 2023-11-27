@@ -1,0 +1,10 @@
+.*
+!/.gitignore
+.DS_Store
+*.csv
+*.json
+/data_collection/stepstone_data_engineering.py
+/data_collection/stepstone_data_collection.ipynb
+/elasticsearch3
+/elasticsearch/bulk_script.py
+/elasticsearch/ingest_data.py

@@ -104,14 +104,16 @@ df_new=pd.DataFrame(list(zip(job_titles, companies, locations, description_title
 df_new['time_of_scraping'] = pd.Series([dt_string] * len(df_new))
 
 ### save dataframe into .csv    
-old_df = pd.read_csv('jobs.csv')
-jobs = pd.concat([old_df, df_new], ignore_index=True)
-jobs.to_csv('./jobs.csv')
+#old_df = pd.read_csv('jobs.csv', index_col=None)
+#old_df = old_df.drop(['Unnamed: 0'], axis=1)
+#jobs = pd.concat([old_df, df_new], ignore_index=True)
+#jobs.to_csv('./jobs.csv')
 
-## when initialized: #df_new.to_csv('./jobs.csv')
+## when initialized: #
+df_new.to_csv('./jobs.csv', index=False)
 
 ### status print
-print("the new file has", len(jobs), "entries")
+print("the new file has", len(df_new), "entries")
 
 
 
