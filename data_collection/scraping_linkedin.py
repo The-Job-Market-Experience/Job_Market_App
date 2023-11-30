@@ -7,9 +7,10 @@ Created on Tue Oct 10 13:45:46 2023
 
 import requests
 from bs4 import BeautifulSoup as bs
+import pandas as pd
 
 data = []
-max_jobs = 100
+max_jobs = 10 #Number of jobs to be retrieved
 
 def parse_job(job):
     entry = {}
@@ -49,14 +50,17 @@ while index < max_jobs:
     url = base_url + str(index)
     response = requests.get(url)
     soup = bs(response.content, "html.parser")
-    
+    print("Getting job #{} ...".format(index+1))
     index += 25
     job_titles = soup.select('li > div.base-card.relative')
     
     for job in job_titles:
         parse_job(job)
 
-    
-print(data[0])    
-print(len(data))
-print(t0 - time.time())
+   
+#print(data[0])    
+print("elements retrieved", len(data))
+print("time taken", time.time() -t0)
+
+df = pd.DataFrame(data)
+df.to_csv('../elasticsearch/jobs_linkedin.csv', index=False)
