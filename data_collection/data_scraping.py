@@ -54,7 +54,7 @@ print(len(job_offer_links), "new job offers found.")
 ###############################################################################
 
 ## parse and scrape from each job offer page
-job_titles, companies, locations = [],[],[]
+job_titles, companies, locations, announcement_dates, work_types, contract_types = [],[],[],[],[],[]
 description_titles, descriptions, benefits = [],[],[]
 
 for job_link in job_offer_links:
@@ -62,55 +62,92 @@ for job_link in job_offer_links:
     job_response = requests.get(job_link, headers = headers)
     print("request status:", job_response.status_code)
     
-    job_soup = bs(job_response.text, 'html.parser')
-    
-    job_title = job_soup.find('span', class_='listing-content-provider-bewwo')
-    job_titles.append(job_title.text)
-    
-    company = job_soup.find('a', class_='listing-content-provider-zw6cpm')
-    
-    location_elements = job_soup.find_all('span', class_='listing-content-provider-1whr5zf')
-    location_elements_list = [location.text for location in location_elements]
-    locations.append(location_elements_list)
-    
-    benefit = job_soup.find('h4', class_='listing-company-content-provider-1nsjzge listingHeaderColor')
-    
-    description_title_elements = job_soup.find_all('h4', class_='listing-content-provider-1t9vh2w listingHeaderColor')
-    description_title_list = [element.text for element in description_title_elements]
-    description_titles.append(description_title_list)
-    description_elements = job_soup.find_all('span', class_='listing-content-provider-14ydav7')
-    description_list = [element.text for element in description_elements]
-    descriptions.append(description_list)
-    
-    
-    if company:
-        companies.append(company.text)
-    else:
-        companies.append('not available')
+    if job_response.status_code == 200:
+        job_soup = bs(job_response.text, 'html.parser')
         
-    if benefit:
-        benefit_elements = job_soup.find_all('span', class_='listing-company-content-provider-1mvot2o')
-        benefit_list = [element.text for element in benefit_elements]
-        benefits.append(benefit_list)
+        job_title = job_soup.find('span', class_='listing-content-provider-bewwo')
+        job_titles.append(job_title.text)
+        
+        company = job_soup.find('a', class_='listing-content-provider-zw6cpm')
+        
+        ################################
+        
+        location_li = job_soup.find('li', class_='listing-content-provider-l3w8lv at-listing__list-icons_location js-map-offermetadata-link data-map-offermetadata-trigger')
+        if location_li:
+            location = location_li.find('span', class_='listing-content-provider-1whr5zf')
+            locations.append(location.text)
+        else:
+            locations.append('not available')
+            
+        ###################################
+            
+        date_li = job_soup.find('li', class_='listing-content-provider-l3w8lv at-listing__list-icons_date')
+        if date_li:
+            announcement_date = date_li.find('span', class_='listing-content-provider-1whr5zf')
+            announcement_dates.append(announcement_date.text)
+        else:
+            announcement_dates.append('not available')
+            
+        ###########################
+        
+        contract_type_li = job_soup.find('li', class_='listing-content-provider-l3w8lv at-listing__list-icons_contract-type')
+        if contract_type_li:
+            contract_type = contract_type_li.find('span', class_='listing-content-provider-1whr5zf')
+            contract_types.append(contract_type.text)
+        else:
+            contract_types.append('not available')
+            
+        ###################################
+        
+        work_type_li = job_soup.find('li', class_='listing-content-provider-l3w8lv at-listing__list-icons_work-type')
+        if work_type_li:
+            work_type = work_type_li.find('span', class_='listing-content-provider-1whr5zf')
+            work_types.append(work_type.text)
+        else:
+            work_types.append('not available')
+            
+        ###################################
+        
+    
+        benefit = job_soup.find('h4', class_='listing-company-content-provider-1nsjzge listingHeaderColor')
+    
+        description_title_elements = job_soup.find_all('h4', class_='listing-content-provider-1t9vh2w listingHeaderColor')
+        description_title_list = [element.text for element in description_title_elements]
+        description_titles.append(description_title_list)
+        description_elements = job_soup.find_all('span', class_='listing-content-provider-14ydav7')
+        description_list = [element.text for element in description_elements]
+        descriptions.append(description_list)
+    
+    
+        if company:
+            companies.append(company.text)
+        else:
+            companies.append('not available')
+        
+        if benefit:
+            benefit_elements = job_soup.find_all('span', class_='listing-company-content-provider-1mvot2o')
+            benefit_list = [element.text for element in benefit_elements]
+            benefits.append(benefit_list)
+        else:
+            benefits.append('not available')
+    
     else:
-        benefits.append('not available')
+        print('ERROR: There is an issue with the request')
 
 #############################################################################
 
 
-
-df_new=pd.DataFrame(list(zip(job_titles, companies, locations, description_titles, descriptions, benefits)), columns=['job_titles', 'companies', 'locations', 'description_titles', 'descriptions', 'benefits'])
+df_new=pd.DataFrame(list(zip(job_titles, companies, locations,announcement_dates, work_types, contract_types, description_titles, descriptions, benefits)), columns=['job_titles', 'companies', 'locations', 'announcement_dates', 'work_types', 'contract_types', 'description_titles', 'descriptions', 'benefits'])
 
 df_new['time_of_scraping'] = pd.Series([dt_string] * len(df_new))
 
 ### save dataframe into .csv    
-#old_df = pd.read_csv('jobs.csv', index_col=None)
-#old_df = old_df.drop(['Unnamed: 0'], axis=1)
-#jobs = pd.concat([old_df, df_new], ignore_index=True)
-#jobs.to_csv('./jobs.csv')
+old_df = pd.read_csv('listings.csv', index_col=None)
+df_new = pd.concat([old_df, df_new], ignore_index=True)
+df_new.to_csv('./listings.csv', index=False)
 
 ## when initialized: #
-df_new.to_csv('./jobs.csv', index=False)
+#df_new.to_csv('./listings.csv', index=False)
 
 ### status print
 print("the new file has", len(df_new), "entries")
