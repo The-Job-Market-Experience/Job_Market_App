@@ -139,15 +139,34 @@ for job_link in job_offer_links:
 
 df_new=pd.DataFrame(list(zip(job_titles, companies, locations,announcement_dates, work_types, contract_types, description_titles, descriptions, benefits)), columns=['job_titles', 'companies', 'locations', 'announcement_dates', 'work_types', 'contract_types', 'description_titles', 'descriptions', 'benefits'])
 
-df_new['time_of_scraping'] = pd.Series([dt_string] * len(df_new))
+df_new['time_of_scraping'] = pd.to_datetime(pd.Series([dt_string] * len(df_new)))
 
+###############################################################################
+## dealing with time of posting
+
+# Extract the number and unit of time from 'anouncement_date'
+extracted_data = df_new['announcement_dates'].str.extract(r'vor (\d+) (\w+)', expand=False)
+# Assign the results of extraction to new columns
+df_new['quantity'] = pd.to_numeric(extracted_data[0], errors='coerce')
+df_new['unit'] = extracted_data[1]
+# Check for NaN values in the 'quantity' column and replace them with zeros
+df_new['quantity'].fillna(0, inplace=True)
+# Convert time units to hours
+df_new['quantity_in_hours'] = df_new.apply(
+    lambda row: row['quantity'] if row['unit'] in ['Stunde', 'Stunden'] else row['quantity'] * 24 if row['unit'] in ['Tag', 'Tage'] else row['quantity'] * 7 * 24 if row['unit'] in ['Wochen', 'Woche'] else 0,
+    axis=1
+)
+# Apply the time difference to obtain 'posting_time'
+df_new['posting_time'] = df_new.apply(lambda row: row['time_of_scraping'] - datetime.timedelta(hours=row['quantity_in_hours']), axis=1)
+
+###################################################################################
 ### save dataframe into .csv    
-old_df = pd.read_csv('listings.csv', index_col=None)
-df_new = pd.concat([old_df, df_new], ignore_index=True)
-df_new.to_csv('./listings.csv', index=False)
-
-## when initialized: #
+#old_df = pd.read_csv('listings.csv', index_col=None)
+#df_new = pd.concat([old_df, df_new], ignore_index=True)
 #df_new.to_csv('./listings.csv', index=False)
+
+## when initializing 
+df_new.to_csv('./listings.csv', index=False)
 
 ### status print
 print("the new file has", len(df_new), "entries")
