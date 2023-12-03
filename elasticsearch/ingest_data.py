@@ -11,6 +11,9 @@ print(es.ping())
 file_path = os.path.join(os.path.dirname(__file__), 'jobs_stepstone.csv')
 print(file_path)
 
+# Specify the delimiter as ;
+delimiter = ';'
+
 with open(file_path, encoding='utf-8') as f:
-    reader = csv.DictReader(f)
+    reader = csv.DictReader(f,  delimiter=delimiter)
     helpers.bulk(es, reader, index='jobs_stepstone')
