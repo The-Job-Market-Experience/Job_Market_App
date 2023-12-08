@@ -38,7 +38,7 @@ contract_mapping = {
 
 ############### Welcome to the jungle
 
-df = pd.read_csv('./elasticsearch/WttJ_jobs.csv.csv', sep =',')
+df = pd.read_csv('./WttJ_jobs.csv.csv', sep =',')
 
 # Split the 'salary' column
 df[['salary_min', 'salary_max']] = df['salary_range'].str.split(' to ', expand=True)
