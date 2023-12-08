@@ -1,4 +1,4 @@
-# Job_Market_App
+# Job Market Platforms
 
 This repository provides a complete solution for gathering **data-related job listings for Germany** from the following websites: Stepstone and Welcome to the Jungle. It includes steps for changing the data into a uniform format and then putting it into an Elasticsearch database set up in Docker. Once the data is in the database, it's available through a FastAPI, which can be used for making data visualisations.
 
