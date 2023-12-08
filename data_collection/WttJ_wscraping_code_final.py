@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[2]:
-
-
 import csv
 from time import sleep
 
@@ -164,8 +161,6 @@ def append_to_csv(data, file_name):
 # Call the function to append data to the CSV
 append_to_csv(data_to_append, 'WttJ_jobs.csv')
 
-
-# In[ ]:
 
 
 
