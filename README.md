@@ -26,13 +26,14 @@ The project is organized into different folders: "data_collection," "elasticsear
     - Follow On-screen Instructions - Docker might ask for additional setup steps once launched.
   
    For Windows:
-   download the installer using PowerShell and then run it manually!
+   
+   !download the installer using PowerShell and then run it manually!
     - Open PowerShell as Administrator: Search for PowerShell in the Start menu, right-click it, and select "Run as administrator".
     - To download Docker for Windows, use the ```Invoke-WebRequest``` command in PowerShell. First, obtain the latest installer URL from the Docker website.       Then execute the following command, replacing "<URL>" with the actual download link:
-      * * powershell * * ```Invoke-WebRequest -Uri   "https://download.docker.com/win/stable/Docker Desktop Installer.exe" -OutFile   "$HOME\Downloads\DockerInstaller.exe"```
+      powershell: ```Invoke-WebRequest -Uri   "https://download.docker.com/win/stable/Docker Desktop Installer.exe" -OutFile   "$HOME\Downloads\DockerInstaller.exe"```
     - Run "DockerInstaller.exe" and complete the installation by following the on-screen instructions
 
-5. Data Cleaning and Feature Engineering:
+6. Data Cleaning and Feature Engineering:
     - output is a cleaned dataset and ready for ingestion into the dockerized ElasticSearch data warehouse
         ```run cleaning.py```
 
