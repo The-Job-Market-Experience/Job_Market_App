@@ -20,6 +20,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 
 # arrive at first destination page
+
+### for windows user:
+# driver = webdriver.Chrome(ChromeDriverManager().install())
+
+### for unix users:
 driver = webdriver.Chrome()
 driver.get("https://www.welcometothejungle.com/en/jobs")
 
