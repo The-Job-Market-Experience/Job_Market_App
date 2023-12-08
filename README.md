@@ -27,7 +27,7 @@ The project is organized into different folders: "data_collection", "elasticsear
   
    For Windows:
    
-   !download the installer using PowerShell and then run it manually!
+   Download the installer using PowerShell and then run it manually!
     - Open PowerShell as Administrator: Search for PowerShell in the Start menu, right-click it, and select "Run as administrator".
     - To download Docker for Windows, use the ```Invoke-WebRequest``` command in PowerShell. First, obtain the latest installer URL from the Docker website.       Then execute the following command, replacing "<URL>" with the actual download link:
       powershell: ```Invoke-WebRequest -Uri   "https://download.docker.com/win/stable/Docker Desktop Installer.exe" -OutFile   "$HOME\Downloads\DockerInstaller.exe"```
@@ -37,16 +37,17 @@ The project is organized into different folders: "data_collection", "elasticsear
     - output is a cleaned dataset and ready for ingestion into the dockerized ElasticSearch data warehouse
         ```run cleaning.py```
 
-[WIP] ElasticSearch image creation
 
-6. [WIP] ElasticSearch Ingection:
+6. ElasticSearch Ingestion:
     - Move to elasticsearch folder ```cd elasticsearch```
-    - run docker compose up -d
+    - run docker ```compose up -d```
     - check with docker ps --> two docker container should be running: kibana and elasticsearch ```run python3 ingest_data.py```
       you can check in browser if locally everything is running and investigate data in elasticsearch UI:
        ```elasticsearch container: http://localhost:9200/```
        ```elasticsearch UI: http://localhost:5601/```
 
-7. [WIP] FastAPI 
-8. Data Consumption:
+7. FastAPI:
+    - Run ```python3 main.py```
+    - API is now running at http://localhost:8000/ and ready to retrieve data from.
+9. Data Consumption:
      - generate data visualisation by ```run project_viz.ipynb```
